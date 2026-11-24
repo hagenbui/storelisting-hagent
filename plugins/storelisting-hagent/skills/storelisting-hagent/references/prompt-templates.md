@@ -12,7 +12,7 @@ Composition: the top 30% of the canvas is calm, clean, empty background with no 
 
 {Shared style block}
 
-Describe the staged screen's content as it is: colorful swatches, the styled output, the fictional brand. Add: "The screen shows the feature in a finished, colorful state. Do not show any real company names, real websites, phone numbers or personal data."
+Describe the staged screen's content as it is: colorful swatches, the styled output, the fictional brand. Add: "Every object, including anything visible inside the phone's camera view, uses only {brand color} tones and warm neutrals; no other strong colors. The screen shows the feature in a finished, colorful state. Do not show any real company names, real websites, phone numbers or personal data."
 
 Device matters. Play shots use an Android phone and App Store shots use an iPhone, because each store rejects or flags the other platform's hardware. Never quote the headline in this prompt.
 

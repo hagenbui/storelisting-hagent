@@ -16,6 +16,8 @@ The user hands over a Figma link to an app design and wants store-ready assets. 
 
 - **Rule: the UI on the phone must look correct and polished.** The screen inside the phone is the product, so layout bugs read as a buggy app. Primary buttons are full width (or exactly as the design system specifies) and centered. Elements are aligned to the same margins, nothing is clipped, and there are no large dead white areas. Placeholder values like "WiFi SSID", "Label" or "example" count as unfinished. Fix these in the staged copy (Step 1b) even if the original design has them, then check the generated phone screen for the same problems. Generators often shrink, shift or invent controls, so compare each one against the staged reference.
 
+- **Rule: everything in the frame is on-brand.** Every visible object uses the app's brand colors (from Step 1) or warm neutrals (white, cream, wood, soft gray). That includes photos and products inside the phone screen, such as a camera viewfinder's subject, plus props and backgrounds. A strong off-brand color, like a purple package in an orange app, pulls the eye away from the product and makes the set look unplanned. If the design's own mock photo is off-brand, swap it in the staged copy, or tell the generator exactly which on-brand subject to show (for example "a cream coffee bag with an orange label").
+
 Specs per store are in `references/store-specs.md`, and the prompt patterns are in `references/prompt-templates.md`. Read both before generating.
 
 ## Step 0: Ask first, in one message
@@ -45,6 +47,7 @@ The generator copies whatever the reference shows, so fix the content in Figma b
 - In one `use_figma` call (load the figma-use skill first), duplicate the chosen screens into a scratch section named "Store Pack / staged refs", next to the Store Pack section. Never edit the originals.
 - In the copies, replace every real or confidential item (rule above) with the fictional persona's data, and put each screen in its best state: pick real colors for color swatches and select one, give the QR or other output a colorful style, add a center image or logo where the feature offers it, and fill empty lists and history with varied, realistic fictional entries. Use the app's own components and variants where they exist.
 - Return a list of every swap you made (real, then fictional) and include it in the final reply, so the user can check that nothing slipped through.
+- Replace any off-brand photo or mock content in the copies (camera subjects, product shots, avatars) with on-brand material, or note the subject to describe in the prompt.
 - Also fix layout problems in the copies: make the primary call-to-action full width and centered, align elements to the screen margins, and fill dead space with relevant content.
 - Screenshot the staged copies, not the originals, in Step 2. Read them back once to confirm that no real names, domains, numbers or coordinates remain.
 
@@ -63,7 +66,7 @@ The generator's `reference_image` must be a path on the user's Mac.
 - Play shots show an Android phone and App Store shots show an iPhone. Do the two stores as separate generations, because the device frame differs.
 - Submit two jobs at a time (the plugin runs two concurrently), poll `fetch_image` about every 30 seconds, and never resubmit a job that is still running.
 - Copy each finished image from tool-results to `/mnt/project-files/<app>-store/raw/` straight away.
-- Look at every image. Regenerate if it has any text outside the phone (stray words, fake logos, labels on props), a busy or dark text area, invented UI labels, or a cut-off phone. Also regenerate if the phone UI drifts from the staged reference (a shrunken or off-center button, missing or extra tabs, invented controls), if it has anything real or confidential (the generator sometimes brings back brand names or domains from memory), a feature shown in a dull default state, or props that don't match the screen. Name the problem in the new prompt.
+- Look at every image. Regenerate if it has any text outside the phone (stray words, fake logos, labels on props), a busy or dark text area, invented UI labels, or a cut-off phone. Also regenerate if any object in the scene uses a strong off-brand color, if the phone UI drifts from the staged reference (a shrunken or off-center button, missing or extra tabs, invented controls), if it has anything real or confidential (the generator sometimes brings back brand names or domains from memory), a feature shown in a dull default state, or props that don't match the screen. Name the problem in the new prompt.
 
 ## Step 4: Fit the art to exact sizes
 
@@ -106,7 +109,7 @@ Fix every failure before delivering. The checker counts characters the way the s
 
 ## Step 8: Deliver
 
-- Before delivering, audit every asset against each rule at the top (no baked text, best state, no real data, polished UI), and fix any failures. Include a one-line pass note per asset in the reply.
+- Before delivering, audit every asset against each rule at the top (no baked text, best state, no real data, polished UI, on-brand colors), and fix any failures. Include a one-line pass note per asset in the reply.
 
 - Make sure `final/` is in the agreed Mac folder.
 - In the reply, attach the contact sheet, the icon and the feature graphic (6 attachments at most per message), and link the Figma section where the text can be edited. Then list what each store got, the specs checked, where the copy came from, and any trade-offs, such as a copy fix.
