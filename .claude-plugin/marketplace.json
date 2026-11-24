@@ -1,0 +1,14 @@
+{
+  "name": "storelisting-hagent",
+  "description": "Hagen's store listing tools for Claude Code",
+  "owner": { "name": "Hagen" },
+  "plugins": [
+    {
+      "name": "storelisting-hagent",
+      "source": "./plugins/storelisting-hagent",
+      "description": "Google Play and App Store listing packs from a Figma design: AI-generated screenshots, icon, feature graphic and listing text.",
+      "category": "design",
+      "tags": ["aso", "play-store", "app-store", "figma", "screenshots"]
+    }
+  ]
+}

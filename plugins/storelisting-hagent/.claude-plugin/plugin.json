@@ -1,6 +1,5 @@
 {
   "name": "storelisting-hagent",
-  "version": "0.1.0",
   "description": "Generate Google Play and Apple App Store listing packs (screenshots, icon, feature graphic, listing text) from a Figma app design, using the OpenAI image generator.",
   "author": { "name": "Hagen" }
 }
