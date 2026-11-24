@@ -24,6 +24,14 @@ The user hands over a Figma link to an app design and wants store-ready assets. 
 
 - **Rule: headlines are short, one line, and have some life.** Write each headline to fit on one line (about 2 to 4 words), all at the same size across the set, with the key word in a brand-color gradient and a soft brand-colored glow or shadow. Pick a display font with character for the headline (not necessarily the app's UI font) and keep it consistent across the set. Always pair it with a readable subtitle: one line, about 4% of the frame width, semibold, in a dark warm color, never light gray. Keep the headline block close to the phone, without a large empty band in between.
 
+- **Rule: headline sits in the top golden area.** Put the top edge of the copy block at about 6% of the canvas height (5 to 7%, about 115 px on a 1920 px screenshot), centered horizontally. Never center the copy vertically in the empty space above the phone; that pushes it too far from the top edge.
+
+- **Rule: never crop.** No container may clip its content: copy groups, auto-layout frames and text with outlines or shadows must have clip content turned off, and nothing may be hidden by a parent's bounds. Fit generated art without trimming the sides (`--crop 0`), so no prop, card or device is cut at the canvas edge. Before delivery, audit every frame for clipped children (compare each node's absoluteRenderBounds with any clipping ancestor) and look for props touching the edges.
+
+- **Rule: no repeated images, no IP.** Every screenshot shows a different subject (different drawings, photos and props across the whole pack, including thumbnails inside the phone). No copyrighted or brand characters or look-alikes, and no anime-style people, even if the app's own templates use them; swap in original, neutral subjects (animals, objects, places).
+
+- **Hard rule: phone mockups have correct anatomy and aspect ratio.** A wrong phone is an automatic reject. The phone body must match a real device for the app's screen ratio: a 360x800 (9:20) screen sits in a body of about 1:2.05 to 1:2.15 (width:height), with thin even bezels, rounded corners matching the screen corners, one centered punch-hole camera and side buttons on one edge only. The screen UI must lie on the same plane as the body: every UI row stays parallel to the bezel edges, and nothing is wider, shorter or skewed differently from the glass. Image generators get this wrong in tilted or perspective shots (they paste the UI as a flat texture, so the bezel tilts one way while the text and cards tilt another, and the body comes out too wide or too short). So: (1) by default ask for the phone upright and facing the viewer, with "correct real phone proportions, 9:20 screen"; (2) use a tilted or perspective phone only if the screen is put on afterwards with a real perspective transform (Figma or PIL corner-pin onto the glass), never generator-drawn; (3) after every generation, measure the phone's bounding box (height / width must be within 5% of the target ratio, using the full phone, not a cropped part) and check that UI rows run parallel to the bezel; reject and regenerate anything that fails. Close-ups that crop the phone still need correct corners, bezel width and UI scale.
+
 Specs per store are in `references/store-specs.md`, and the prompt patterns are in `references/prompt-templates.md`. Read both before generating.
 
 ## Step 0: Ask first, in one message
@@ -77,8 +85,8 @@ The generator's `reference_image` must be a path on the user's Mac.
 ## Step 4: Fit the art to exact sizes
 
 ```
-python3 scripts/fit_asset.py play-shot raw/01.png art/play_screenshot_01_<topic>.png
-python3 scripts/fit_asset.py ios-shot  raw/01_ios.png art/ios_screenshot_01_<topic>.png
+python3 scripts/fit_asset.py play-shot raw/01.png art/play_screenshot_01_<topic>.png --crop 0 --anchor top
+python3 scripts/fit_asset.py ios-shot  raw/01_ios.png art/ios_screenshot_01_<topic>.png --crop 0 --anchor top
 python3 scripts/fit_asset.py play-icon raw/icon.png final/play_icon_512.png
 python3 scripts/fit_asset.py ios-icon  raw/icon.png final/ios_icon_1024.png
 python3 scripts/fit_asset.py play-fg   raw/feature.png art/play_feature_graphic_1024x500.png
@@ -92,7 +100,7 @@ Load the figma-use skill before any `use_figma` call.
 
 1. **Frames.** On the design's page, below the existing content, create a section named "Store Pack". In it, create one frame per screenshot and one for the feature graphic, at exact store size (for example 1080x1920 or 1320x2868), named after the output file (`play_screenshot_01_scan`). Return the frame ids.
 2. **Art as background.** Call `upload_assets` with those frame ids as `nodeIds` and `scaleMode: FILL`, to get single-use POST URLs (mcp.figma.com, valid for 10 minutes). The cloud container and the Cowork VM can't reach that host, so run the curl POSTs (`-H "Content-Type: image/png" --data-binary @file`) from the user's Mac through a Remote Control session in a folder they've approved. Create the URLs right before starting that session. Upload the real app icon the same way, into an image frame inside the feature graphic.
-3. **Text layers.** In one `use_figma` call, add to each frame a vertical auto-layout "Copy" group, centered in the empty top area: a "Headline" text (one line, a display font with character, about 9% of the frame width, near-black with the key word in a brand gradient and a soft glow; see the headline rule) and a "Subline" text (one line, semibold, dark warm color, about 4%). For the feature graphic, put the icon, the app name and the tagline as text in the empty left area. Load each font with `listAvailableFontsAsync` / `loadFontAsync` first. Keep the text inside the store-safe margins, and make sure it doesn't overlap the phone.
+3. **Text layers.** In one `use_figma` call, add to each frame a vertical auto-layout "Copy" group with clip content off, its top edge at about 6% of the frame height (the golden area rule above): a "Headline" text (one line, a display font with character, about 9% of the frame width, near-black with the key word in a brand gradient and a soft glow; see the headline rule) and a "Subline" text (one line, semibold, dark warm color, about 4%). For the feature graphic, put the icon, the app name and the tagline as text in the empty left area. Load each font with `listAvailableFontsAsync` / `loadFontAsync` first. Keep the text inside the store-safe margins, and make sure it doesn't overlap the phone.
 4. **Check.** Screenshot the section (`get_screenshot`) and look for clipped or overlapping text and poor contrast on the art. Fix those before export.
 5. **Other languages.** Duplicate the frames and replace only the text. The art is shared, which is the point of keeping text out of it. Name the copies with a locale suffix (`play_screenshot_01_scan_vi`).
 

@@ -62,7 +62,7 @@ def fit(src, dst, kind, crop=None, anchor="center"):
             new_h = round(w / target)
             if new_h > h:
                 extra = new_h - h
-                before = 0 if anchor == "top" else extra // 2
+                before = extra if anchor == "top" else extra // 2
                 a = _extend(a, before, extra - before, 0)
             else:  # trimming alone was enough; center-crop height
                 y = (h - new_h) // 2
