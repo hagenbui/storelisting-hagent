@@ -8,9 +8,11 @@ Background: {light brand tint} to {lighter tint} gradient with large smooth flow
 ## Screenshot (text-free art; the headline is added later in Figma)
 {Store} promotional screenshot background art, portrait, for {app type}. Use the attached app screen as the exact UI shown on the phone: {list the key UI elements and their visible labels, so the generator keeps them}.
 
-Composition: the top 30% of the canvas is calm, clean, empty background with no objects and no text, reserved for a headline that will be added later. The lower 70%: a modern slim {Android phone with thin bezels and punch-hole camera | iPhone with Dynamic Island} showing the app screen, {upright | slightly tilted 6 degrees}, soft realistic shadow. {1 or 2 props that echo the feature: floating glossy 3D tiles in the brand color with white icons, spheres, a printed QR card, swatches...}, subtle depth of field.
+Composition: the top 30% of the canvas is calm, clean, empty background with no objects and no text, reserved for a headline that will be added later. The lower 70%: a modern slim {Android phone with thin bezels and punch-hole camera | iPhone with Dynamic Island} showing the app screen, {upright | slightly tilted 6 degrees}, soft realistic shadow. {1 or 2 props that echo the feature and match exactly what the screen shows (same colors, same styled output): floating glossy 3D tiles in the brand color with white icons, spheres, a printed QR card, swatches...}, subtle depth of field.
 
 {Shared style block}
+
+Describe the staged screen's content as it is: colorful swatches, the styled output, the fictional brand. Add: "The screen shows the feature in a finished, colorful state. Do not show any real company names, real websites, phone numbers or personal data."
 
 Device matters. Play shots use an Android phone and App Store shots use an iPhone, because each store rejects or flags the other platform's hardware. Never quote the headline in this prompt.
 
