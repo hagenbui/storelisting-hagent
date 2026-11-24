@@ -5,7 +5,7 @@ A Claude skill (packaged as a Claude Code plugin) that builds store listing pack
 - **Google Play:** phone screenshots (1080x1920), 512x512 icon, 1024x500 feature graphic, and optional title, short and full description
 - **Apple App Store:** iPhone 6.9" screenshots (1320x2868), optional iPad 13" (2064x2752), 1024x1024 icon, and optional name, subtitle, promo text, description and keywords
 
-The visuals are generated with the OpenAI image generator (the omniroute-images plugin), with the real Figma screens passed in as references. Copy comes from the design. Before it starts, the skill asks which stores, which assets and which languages you want.
+The visuals are generated with the OpenAI image generator (the omniroute-images plugin), with the real Figma screens passed in as references. Copy comes from the design and is always added as live Figma text on top of text-free generated art, never baked into the images, so it stays editable and translatable. Before it starts, the skill asks which stores, which assets and which languages you want.
 
 ## Layout
 

@@ -8,7 +8,8 @@ description: Build Google Play and/or Apple App Store listing packs from a Figma
 The user hands over a Figma link to an app design and wants store-ready assets. Two standing preferences shape everything here:
 
 - **The visuals are generated, not laid out.** Use the OpenAI image generator (the `omniroute-images` plugin, `model: gpt`, `quality: high`) and pass the real Figma screen as the reference, so each phone shows the actual UI inside a polished marketing scene. Plain frame-plus-text layouts are not what they want.
-- **The words come from Figma.** Headlines and sublines are taken from the design's own copy (onboarding titles and bodies, feature labels, button text) rather than invented. Small grammar fixes are fine if you mention them.
+- **The words come from Figma, and they live in Figma.** Headlines and sublines are taken from the design's own copy (onboarding titles and bodies, feature labels, button text) rather than invented. Small grammar fixes are fine if you mention them.
+- **Rule: never bake marketing text into a generated image.** Headlines, sublines, the app name or wordmark, taglines and badges are always added as live text layers in Figma, on top of text-free generated art. Generated text gets misspelled, can't be edited, and can't be translated; live Figma text can be fixed in seconds and reused for every language with the same art. The only text allowed in the generated image is the app's own UI inside the phone screen, copied from the reference screen.
 
 Specs per store are in `references/store-specs.md`, and the prompt patterns are in `references/prompt-templates.md`. Read both before generating.
 
@@ -20,7 +21,7 @@ Before reading the file or generating anything, ask these together and wait for 
 2. **Assets:** the default is 5 phone screenshots, the icon, and the feature graphic (Play only). Add iPad / tablet screenshots? Skip the icon if the app already has a final one?
 3. **Listing text:** also write the store text (Play: title, short and full description. App Store: name, subtitle, promotional text, description, keywords)?
 4. **Languages:** English only, or others too (for example Vietnamese)? Each language multiplies the screenshots, so confirm.
-5. **Where to save:** a folder on their Mac, and whether to place the results in the Figma file too.
+5. **Where to save:** a folder on their Mac. The text is always added in their Figma file, so confirm which page the Store Pack section should go on.
 
 Offer sensible defaults in the question ("If you just say go: both stores, 5 screenshots each, icon, feature graphic, English, no listing text") so a one-word reply works. Save the answers in project memory if the same app is likely to come back.
 
@@ -40,28 +41,44 @@ The generator's `reference_image` must be a path on the user's Mac.
 - Copy them to `/mnt/project-files/<app>-store/refs/`, then `device_commit_files` them into the agreed Mac folder under `refs/`. Request folder access once if needed.
 - For the icon, crop the app icon out of the splash or home screen.
 
-## Step 3: Generate
+## Step 3: Generate text-free art
 
 - Screenshots: 1024x1536. Icon: 1024x1024. Feature graphic: 1536x1024.
+- Every prompt says the art has no text outside the phone screen, and leaves clean, calm background where the text will go: the top ~30% of each screenshot, and the left ~45% of the feature graphic. See `references/prompt-templates.md`. Don't put the headline into the prompt at all, because generators tend to draw any quoted words.
 - Play shots show an Android phone and App Store shots show an iPhone. Do the two stores as separate generations, because the device frame differs.
 - Submit two jobs at a time (the plugin runs two concurrently), poll `fetch_image` about every 30 seconds, and never resubmit a job that is still running.
 - Copy each finished image from tool-results to `/mnt/project-files/<app>-store/raw/` straight away.
-- Look at every image: misspelled headline, invented UI labels, a cut-off phone, text too close to the side edges. Regenerate only the failures, with the problem named in the prompt.
+- Look at every image. Regenerate if it has any text outside the phone (stray words, fake logos, labels on props), a busy or dark text area, invented UI labels, or a cut-off phone, with the problem named in the prompt.
 
-## Step 4: Fit to exact sizes and check
+## Step 4: Fit the art to exact sizes
 
 ```
-python3 scripts/fit_asset.py play-shot raw/01.png final/play_screenshot_01_<topic>.png
-python3 scripts/fit_asset.py ios-shot  raw/01_ios.png final/ios_screenshot_01_<topic>.png
+python3 scripts/fit_asset.py play-shot raw/01.png art/play_screenshot_01_<topic>.png
+python3 scripts/fit_asset.py ios-shot  raw/01_ios.png art/ios_screenshot_01_<topic>.png
 python3 scripts/fit_asset.py play-icon raw/icon.png final/play_icon_512.png
 python3 scripts/fit_asset.py ios-icon  raw/icon.png final/ios_icon_1024.png
-python3 scripts/fit_asset.py play-fg   raw/feature.png final/play_feature_graphic_1024x500.png
-python3 scripts/check_pack.py final/
+python3 scripts/fit_asset.py play-fg   raw/feature.png art/play_feature_graphic_1024x500.png
 ```
 
-The fit script trims a little from the sides and extends the background for the rest, because the generator's 2:3 output doesn't match 9:16 or the iPhone ratio and plain cropping cuts headlines. Keep the file-name prefixes, because `check_pack.py` matches on them. View one fitted screenshot per store before moving on, and make a contact sheet of all the screenshots for the user.
+The fit script trims a little from the sides and extends the background for the rest, because the generator's 2:3 output doesn't match 9:16 or the iPhone ratio. With `--anchor top`, all the extension goes above the phone, which gives the headline more room. Icons have no text, so they go straight to `final/`. Screenshots and the feature graphic go to `art/`, because they still need their text.
 
-## Step 5: Listing text (if requested)
+## Step 5: Add the text in Figma
+
+Load the figma-use skill before any `use_figma` call.
+
+1. **Frames.** On the design's page, below the existing content, create a section named "Store Pack". In it, create one frame per screenshot and one for the feature graphic, at exact store size (for example 1080x1920 or 1320x2868), named after the output file (`play_screenshot_01_scan`). Return the frame ids.
+2. **Art as background.** Call `upload_assets` with those frame ids as `nodeIds` and `scaleMode: FILL`, to get single-use POST URLs (mcp.figma.com, valid for 10 minutes). The cloud container and the Cowork VM can't reach that host, so run the curl POSTs (`-H "Content-Type: image/png" --data-binary @file`) from the user's Mac through a Remote Control session in a folder they've approved. Create the URLs right before starting that session. Upload the real app icon the same way, into an image frame inside the feature graphic.
+3. **Text layers.** In one `use_figma` call, add to each frame a vertical auto-layout "Copy" group, centered in the empty top area: a "Headline" text (the app's display font from Step 1, bold, near-black or the brand's dark color, about 6 to 7% of the frame width per line, at most 2 lines) and a "Subline" text (regular weight, dark gray, about 3.5%). For the feature graphic, put the icon, the app name and the tagline as text in the empty left area. Load each font with `listAvailableFontsAsync` / `loadFontAsync` first. Keep the text inside the store-safe margins, and make sure it doesn't overlap the phone.
+4. **Check.** Screenshot the section (`get_screenshot`) and look for clipped or overlapping text and poor contrast on the art. Fix those before export.
+5. **Other languages.** Duplicate the frames and replace only the text. The art is shared, which is the point of keeping text out of it. Name the copies with a locale suffix (`play_screenshot_01_scan_vi`).
+
+## Step 6: Export and check
+
+- Export each frame with `download_assets` (`defaultFormat: png`, `defaultScale: 1`), so the output is exactly the frame size. The returned URLs are on figma.com, which the cloud container can't reach. Download them on the user's Mac (Remote Control `curl -L -o`) into the pack's `final/` folder. Alternatively, ask the user to select the section in Figma and export at 1x.
+- Run `python3 scripts/check_pack.py final/`. Keep the file-name prefixes, because the checker matches on them.
+- Make a contact sheet of all the screenshots for the user.
+
+## Step 7: Listing text (if requested)
 
 Write it from the Figma copy and the screens, in a `listing.json` shaped like `{"app": "QR Tap", "locales": {"en-US": {"ios": {...}, "play": {...}}, "vi": {...}}}`. The field names and limits are in `scripts/check_listing.py` (`LIMITS`), and the store rules are in `references/store-specs.md`. Then run:
 
@@ -72,13 +89,7 @@ python3 scripts/check_listing.py listing.json --write   # also writes fastlane/m
 
 Fix every failure before delivering. The checker counts characters the way the store consoles do and flags phrases like "#1", "best" or "free" that Play and Apple reject.
 
-## Step 6: Deliver
+## Step 8: Deliver
 
-- Commit `final/` to the Mac folder.
-- In the reply, attach the contact sheet, the icon and the feature graphic (6 attachments at most per message). Then list what each store got, the specs checked, where the copy came from, and any trade-offs, such as how the 9:16 fit was done or a copy fix.
-
-## Step 7: Optional, place in Figma
-
-- With one `use_figma` call (load the figma-use skill first), create a section named "Store Pack (AI generated)" below the existing content on the same page, with one frame per asset at its exact size. Return the frame ids.
-- `upload_assets` with those `nodeIds` returns single-use POST URLs on mcp.figma.com that expire after 10 minutes. The cloud container and the Cowork VM can't reach that host, so run the curl POSTs (`-H "Content-Type: image/png" --data-binary @file`) from the user's Mac through a Remote Control session in a folder they've approved. Create the URLs right before starting that session.
-- Confirm with `get_screenshot` of the section and share it.
+- Make sure `final/` is in the agreed Mac folder.
+- In the reply, attach the contact sheet, the icon and the feature graphic (6 attachments at most per message), and link the Figma section where the text can be edited. Then list what each store got, the specs checked, where the copy came from, and any trade-offs, such as a copy fix.
