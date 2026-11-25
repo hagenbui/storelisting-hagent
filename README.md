@@ -20,6 +20,9 @@ plugins/storelisting-hagent/
     references/store-specs.md                   current asset and text limits per store
     references/prompt-templates.md              image-generator prompt patterns
     scripts/fit_asset.py                        resize/extend generated images to exact store sizes
+    scripts/compose_phone.py                    one identical phone + real screen + kit props onto a phone-free scene
+    scripts/merge_props.py                      merge a props-in-context edit back, phone and screen untouched
+    scripts/cut_kit.py                          cut a decor kit sheet into transparent prop PNGs
     scripts/check_pack.py                       verify a finished pack against the specs
     scripts/check_listing.py                    check listing text limits, write fastlane metadata
 ```
@@ -66,6 +69,9 @@ python3 plugins/storelisting-hagent/skills/storelisting-hagent/scripts/fit_asset
 python3 plugins/storelisting-hagent/skills/storelisting-hagent/scripts/fit_asset.py play-icon  in.png out.png
 python3 plugins/storelisting-hagent/skills/storelisting-hagent/scripts/fit_asset.py ios-icon   in.png out.png
 python3 plugins/storelisting-hagent/skills/storelisting-hagent/scripts/fit_asset.py play-fg    in.png out.png
+python3 plugins/storelisting-hagent/skills/storelisting-hagent/scripts/merge_props.py shot.png props.png out.png crop.json
+python3 plugins/storelisting-hagent/skills/storelisting-hagent/scripts/cut_kit.py raw/kit.png kit/
+python3 plugins/storelisting-hagent/skills/storelisting-hagent/scripts/compose_phone.py play-shot scene.png screen.png out.png --props layout.json --body "#2B2B2E"
 python3 plugins/storelisting-hagent/skills/storelisting-hagent/scripts/check_pack.py path/to/pack/
 python3 plugins/storelisting-hagent/skills/storelisting-hagent/scripts/check_listing.py listing.json [--write]
 ```
