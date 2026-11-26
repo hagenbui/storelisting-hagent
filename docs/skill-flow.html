@@ -111,7 +111,7 @@ const steps = [
  {id:'stage', lane:'prep', t:'Dựng màn tham chiếu', s:'Dữ liệu giả, trạng thái đẹp nhất',
   what:'Máy tạo ảnh chép những gì màn tham chiếu cho thấy, nên agent sửa nội dung ngay trong Figma.',
   reads:['Các màn đã chọn'],
-  does:['Nhân bản vào section "Store Pack / staged refs", không sửa bản gốc','Thay mọi dữ liệu thật (tên công ty, domain, email, số điện thoại, tọa độ, tên Wi-Fi) bằng persona giả','Đưa tính năng về trạng thái đẹp nhất: swatch có màu và được chọn, QR có màu, danh sách đầy','Đổi ảnh lệch màu thương hiệu, sửa nút chính full width, căn lề, lấp chỗ trống'],
+  does:['Nhân bản vào section "Store Pack / staged refs", không sửa bản gốc','Thay mọi dữ liệu thật (tên công ty, domain, email, số điện thoại, tọa độ, tên Wi-Fi) bằng persona giả','Đưa tính năng về trạng thái đẹp nhất: swatch có màu và được chọn, QR có màu, danh sách đầy','Đổi ảnh lệch màu thương hiệu, sửa nút chính full width, căn lề, lấp chỗ trống','Phần UI nào được bật ra thành bubble thì ẩn bản gốc trên màn của slide đó (giữ nguyên hoặc chỉnh nhẹ bố cục), không để UI bị lặp'],
   writes:['Section staged refs và danh sách mọi thứ đã thay (thật → giả)'],
   stop:'Đọc lại ảnh chụp một lần để chắc không còn tên, domain hay số thật.',
   src:'SKILL.md: Step 1b'},
