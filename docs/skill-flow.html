@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Store listing flow</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* VOICE: the same quiet flowchart from the chat, nothing added
+   IDEA: a printed process map; a printed process map for one store pack; tap a box to open its spec card
+   PICTURE: prep lane, art lane, the output-mode fork, then delivery
+   COLOUR and TYPE: gray, purple, teal ramps on a plain ground; Inter 400 and 500
+   LAYOUT: short title, chart, modal on click */
+:root{color-scheme:light dark;--bg:light-dark(#ffffff,#1a1a19);--ink:light-dark(#1f1e1d,#ecebe6);--mute:light-dark(#6b6a65,#a8a79f);--line:light-dark(#d9d7cf,#3a3936);--soft:light-dark(#f6f5f1,#242422);
+--g-f:light-dark(#F1EFE8,#444441);--g-s:light-dark(#5F5E5A,#B4B2A9);--g-t:light-dark(#444441,#F1EFE8);--g-u:light-dark(#5F5E5A,#D3D1C7);
+--p-f:light-dark(#EEEDFE,#3C3489);--p-s:light-dark(#534AB7,#AFA9EC);--p-t:light-dark(#3C3489,#EEEDFE);--p-u:light-dark(#534AB7,#CECBF6);
+--c-f:light-dark(#FAECE7,#712B13);--c-s:light-dark(#993C1D,#F0997B);--c-t:light-dark(#712B13,#FAECE7);--c-u:light-dark(#993C1D,#F5C4B3);
+--t-f:light-dark(#E1F5EE,#085041);--t-s:light-dark(#0F6E56,#5DCAA5);--t-t:light-dark(#085041,#E1F5EE);--t-u:light-dark(#0F6E56,#9FE1CB)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 Inter,system-ui,sans-serif;overflow-x:clip}
+main{max-width:920px;margin:0 auto;padding:28px 16px 32px}
+h1{font-size:clamp(24px,3vw,32px);font-weight:500;margin:0;line-height:1.15}
+.meta{margin:6px 0 18px;color:var(--mute);font-size:14px}
+svg{display:block;width:100%;height:auto;font-family:Inter,system-ui,sans-serif}
+.th{font-size:14px;font-weight:500}.ts{font-size:12px}.t{font-size:14px;fill:var(--ink)}.lab{font-size:12px;fill:var(--mute)}
+.arr{stroke:var(--g-s);stroke-width:1.5;fill:none;marker-end:url(#arrow)}
+.node{cursor:pointer;outline:none}.node rect{stroke-width:.5}.node:hover rect,.node:focus-visible rect{stroke-width:2}
+.gray rect{fill:var(--g-f);stroke:var(--g-s)}.gray .th{fill:var(--g-t)}.gray .ts{fill:var(--g-u)}
+.purple rect{fill:var(--p-f);stroke:var(--p-s)}.purple .th{fill:var(--p-t)}.purple .ts{fill:var(--p-u)}
+.teal rect{fill:var(--t-f);stroke:var(--t-s)}.teal .th{fill:var(--t-t)}.teal .ts{fill:var(--t-u)}
+.coral rect{fill:var(--c-f);stroke:var(--c-s)}.coral .th{fill:var(--c-t)}.coral .ts{fill:var(--c-u)}
+.box rect{fill:var(--soft);stroke:var(--g-s)}
+.terms{margin-top:36px;border-top:1px solid var(--line);padding-top:24px}
+.terms h2{font-size:22px;font-weight:500;margin:0 0 12px}
+.tgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr));gap:8px 32px}
+.tgroup h3{font-size:13px;font-weight:500;color:var(--mute);margin:14px 0 4px}
+.terms dl{margin:0}.terms dt{font-weight:500;margin-top:10px;font-size:15px}.terms dd{margin:2px 0 0;font-size:15px;color:var(--ink)}
+.meta a{color:inherit}
+footer{color:var(--mute);font-size:13px;margin-top:16px}
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;padding:16px;z-index:9}
+.ov.on{display:flex}
+.card{background:var(--bg);color:var(--ink);border-radius:14px;width:min(560px,100%);max-height:calc(100vh - 32px);overflow:auto;box-shadow:0 12px 40px rgba(0,0,0,.25)}
+.card header{position:relative;padding:20px 56px 14px 22px;border-bottom:1px solid var(--line)}
+.tag{display:inline-block;font-size:12px;font-weight:500;border-radius:6px;padding:2px 8px}
+.tag.gray{background:var(--g-f);color:var(--g-t)}.tag.purple{background:var(--p-f);color:var(--p-t)}.tag.teal{background:var(--t-f);color:var(--t-t)}.tag.coral{background:var(--c-f);color:var(--c-t)}.tag.box{background:var(--soft);color:var(--ink);border:1px solid var(--line)}
+.card h2{font-size:22px;font-weight:500;margin:8px 0 4px;line-height:1.2}
+.card .what{margin:0;color:var(--mute);font-size:15px}
+.x{position:absolute;top:12px;right:12px;width:44px;height:44px;border:0;background:none;color:var(--ink);font-size:22px;border-radius:8px;cursor:pointer}
+.x:focus-visible,.nav button:focus-visible{outline:2px solid var(--p-s)}
+.spec{padding:4px 22px 8px}
+.spec section{padding:12px 0;border-bottom:1px solid var(--line)}.spec section:last-child{border:0}
+.spec h3{margin:0 0 4px;font-size:13px;font-weight:500;color:var(--mute)}
+.spec ul{margin:0;padding-left:18px}.spec li{margin:3px 0;font-size:15px}
+.stop{background:var(--soft);border-radius:8px;padding:10px 12px;font-size:15px}
+.src{font-size:13px;color:var(--mute)}
+.nav{display:flex;gap:8px;padding:0 22px 20px}
+.nav button{flex:1;min-height:44px;font:inherit;font-size:14px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:8px;cursor:pointer}
+@media(prefers-reduced-motion:no-preference){.ov.on .card{animation:in .18s ease-out}@keyframes in{from{opacity:0;transform:translateY(8px)}}}
+</style></head><body>
+<main>
+<h1>Skill làm store listing như thế nào</h1>
+<p class="meta">Storelisting Hagent · cập nhật 26/11/2026 · bấm vào một bước để xem agent làm gì bên trong · <a href="#terms">Thuật ngữ</a></p>
+<svg viewBox="0 0 680 720" role="img" aria-labelledby="st"><title id="st">Quy trình skill store listing: chuẩn bị, tạo hình và chữ, chọn kiểu đầu ra, giao</title>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+<text class="lab" x="40" y="30">Chuẩn bị (chưa tốn tiền tạo ảnh)</text><text class="lab" x="360" y="30">Tạo hình và chữ</text>
+<text class="lab" x="40" y="458">Song song, nếu bạn yêu cầu</text><text class="lab" x="490" y="441" text-anchor="end">Câu 7: kiểu đầu ra</text>
+<line x1="180" y1="106" x2="180" y2="128" class="arr"/><line x1="180" y1="186" x2="180" y2="208" class="arr"/><line x1="180" y1="266" x2="180" y2="288" class="arr"/><line x1="180" y1="346" x2="180" y2="368" class="arr"/><line x1="500" y1="106" x2="500" y2="128" class="arr"/><line x1="500" y1="186" x2="500" y2="208" class="arr"/><line x1="500" y1="266" x2="500" y2="288" class="arr"/><line x1="500" y1="346" x2="500" y2="368" class="arr"/><path d="M320 398 L340 398 L340 78 L358 78" class="arr"/><path d="M500 426 L500 446 L425 446 L425 468" class="arr"/><path d="M500 446 L575 446 L575 468" class="arr"/><line x1="180" y1="526" x2="180" y2="564" class="arr"/><line x1="425" y1="526" x2="425" y2="564" class="arr"/><line x1="575" y1="526" x2="575" y2="564" class="arr"/><g class="node gray" data-id="ask" tabindex="0" role="button" aria-label="Hỏi trước"><rect x="40" y="50" width="280" height="56" rx="8"/><text class="th" x="180.0" y="70" text-anchor="middle" dominant-baseline="central">Hỏi trước</text><text class="ts" x="180.0" y="90" text-anchor="middle" dominant-baseline="central">7 câu, chờ bạn trả lời</text></g><g class="node gray" data-id="read" tabindex="0" role="button" aria-label="Đọc thiết kế"><rect x="40" y="130" width="280" height="56" rx="8"/><text class="th" x="180.0" y="150" text-anchor="middle" dominant-baseline="central">Đọc thiết kế</text><text class="ts" x="180.0" y="170" text-anchor="middle" dominant-baseline="central">Màn hình, copy, hướng hình ảnh</text></g><g class="node gray" data-id="stage" tabindex="0" role="button" aria-label="Dựng màn tham chiếu"><rect x="40" y="210" width="280" height="56" rx="8"/><text class="th" x="180.0" y="230" text-anchor="middle" dominant-baseline="central">Dựng màn tham chiếu</text><text class="ts" x="180.0" y="250" text-anchor="middle" dominant-baseline="central">Dữ liệu giả, trạng thái đẹp nhất</text></g><g class="node gray" data-id="pack" tabindex="0" role="button" aria-label="Chọn pack (tùy chọn)"><rect x="40" y="290" width="280" height="56" rx="8"/><text class="th" x="180.0" y="310" text-anchor="middle" dominant-baseline="central">Chọn pack (tùy chọn)</text><text class="ts" x="180.0" y="330" text-anchor="middle" dominant-baseline="central">Dataset riêng, bạn chọn 1 trong 3</text></g><g class="node gray" data-id="refs" tabindex="0" role="button" aria-label="Ảnh tham chiếu"><rect x="40" y="370" width="280" height="56" rx="8"/><text class="th" x="180.0" y="390" text-anchor="middle" dominant-baseline="central">Ảnh tham chiếu</text><text class="ts" x="180.0" y="410" text-anchor="middle" dominant-baseline="central">Chụp từ Figma, lưu lên Mac</text></g><g class="node purple" data-id="scene" tabindex="0" role="button" aria-label="Tạo cảnh không chữ"><rect x="360" y="50" width="280" height="56" rx="8"/><text class="th" x="500.0" y="70" text-anchor="middle" dominant-baseline="central">Tạo cảnh không chữ</text><text class="ts" x="500.0" y="90" text-anchor="middle" dominant-baseline="central">Không điện thoại, không props</text></g><g class="node purple" data-id="compose" tabindex="0" role="button" aria-label="Ghép điện thoại"><rect x="360" y="130" width="280" height="56" rx="8"/><text class="th" x="500.0" y="150" text-anchor="middle" dominant-baseline="central">Ghép điện thoại</text><text class="ts" x="500.0" y="170" text-anchor="middle" dominant-baseline="central">Một máy chuẩn, rồi vẽ props</text></g><g class="node purple" data-id="icon" tabindex="0" role="button" aria-label="Icon, feature graphic"><rect x="360" y="210" width="280" height="56" rx="8"/><text class="th" x="500.0" y="230" text-anchor="middle" dominant-baseline="central">Icon, feature graphic</text><text class="ts" x="500.0" y="250" text-anchor="middle" dominant-baseline="central">Fit đúng kích thước store</text></g><g class="node purple" data-id="text" tabindex="0" role="button" aria-label="Chữ trong Figma"><rect x="360" y="290" width="280" height="56" rx="8"/><text class="th" x="500.0" y="310" text-anchor="middle" dominant-baseline="central">Chữ trong Figma</text><text class="ts" x="500.0" y="330" text-anchor="middle" dominant-baseline="central">Headline 2 dòng, icon của app</text></g><g class="node purple" data-id="export" tabindex="0" role="button" aria-label="Xuất và kiểm tra"><rect x="360" y="370" width="280" height="56" rx="8"/><text class="th" x="500.0" y="390" text-anchor="middle" dominant-baseline="central">Xuất và kiểm tra</text><text class="ts" x="500.0" y="410" text-anchor="middle" dominant-baseline="central">check_pack.py, lỗi thì sửa lại</text></g><g class="node teal" data-id="listing" tabindex="0" role="button" aria-label="Listing text (tùy chọn)"><rect x="40" y="470" width="280" height="56" rx="8"/><text class="th" x="180.0" y="490" text-anchor="middle" dominant-baseline="central">Listing text (tùy chọn)</text><text class="ts" x="180.0" y="510" text-anchor="middle" dominant-baseline="central">Câu 3, check_listing.py</text></g><g class="node coral" data-id="layered" tabindex="0" role="button" aria-label="Layered"><rect x="360" y="470" width="130" height="56" rx="8"/><text class="th" x="425.0" y="490" text-anchor="middle" dominant-baseline="central">Layered</text><text class="ts" x="425.0" y="510" text-anchor="middle" dominant-baseline="central">Giữ layer, sửa được</text></g><g class="node coral" data-id="baked" tabindex="0" role="button" aria-label="Baked"><rect x="510" y="470" width="130" height="56" rx="8"/><text class="th" x="575.0" y="490" text-anchor="middle" dominant-baseline="central">Baked</text><text class="ts" x="575.0" y="510" text-anchor="middle" dominant-baseline="central">Gộp 1 ảnh, khóa</text></g><g class="node teal" data-id="deliver" tabindex="0" role="button" aria-label="Giao"><rect x="40" y="566" width="600" height="56" rx="8"/><text class="th" x="340.0" y="586" text-anchor="middle" dominant-baseline="central">Giao</text><text class="ts" x="340.0" y="606" text-anchor="middle" dominant-baseline="central">Soát preferences.md và từng rule, gửi contact sheet và link Figma</text></g>
+
+<g class="node box" data-id="prefs" tabindex="0" role="button" aria-label="Luật cứng"><rect x="40" y="642" width="600" height="44" rx="8"/><text class="t" x="340" y="664" text-anchor="middle" dominant-baseline="central">Ở mọi bước: sở thích của bạn trong file, chat và bộ nhớ thắng mọi mặc định của skill</text></g>
+<text class="lab" x="40" y="712">Xám: chuẩn bị · Tím: tạo hình và chữ · Cam: kiểu đầu ra · Xanh: text và giao · Bấm vào bước bất kỳ</text></svg>
+<section class="terms" id="terms"><h2>Thuật ngữ</h2><div class="tgrid">
+<div class="tgroup"><h3>Đầu vào</h3><dl>
+<dt>Hướng hình ảnh (visual direction)</dt><dd>Trang hoặc frame trong file Figma quy định giao diện của art, ví dụ "Visual Concept", "Moodboard", "Character style lock". Nếu chưa có, vài chữ của bạn là đủ.</dd>
+<dt>refs/preferences.md</dt><dd>Danh sách mọi sở thích cụ thể của bạn, chép nguyên văn: mã màu, font, cách vẽ props và nhân vật, ánh sáng, danh sách cấm. Agent đọc lại trước mỗi đợt prompt.</dd>
+<dt>Màn tham chiếu (staged refs)</dt><dd>Bản sao các màn hình trong section "Store Pack / staged refs", đã thay dữ liệu thật bằng dữ liệu giả và đưa về trạng thái đẹp nhất. Bản gốc không bao giờ bị sửa.</dd>
+<dt>Persona giả</dt><dd>Một bộ dữ liệu giả nhất quán cho cả pack: tên thương hiệu giả, domain example.com, số điện thoại giả, để các màn kể cùng một câu chuyện.</dd></dl></div>
+<div class="tgroup"><h3>Dataset riêng</h3><dl>
+<dt>Pack</dt><dd>Một mẫu store listing trong dataset riêng trên Mac của bạn (biến STORELISTING_DATASET). Agent đưa 3 pack khớp nhất kèm ảnh strip, bạn chọn.</dd>
+<dt>Moodboard</dt><dd>Ảnh ghép từ các pack hợp nhất. Bản không nhãn là ảnh dataset duy nhất được gửi cho máy tạo ảnh, chỉ để mượn bố cục và cân bằng màu.</dd>
+<dt>ip_sensitive</dt><dd>Pack có nhân vật hoặc thương hiệu của người khác. Chỉ dùng làm nguồn thông số, không bao giờ đưa vào moodboard.</dd></dl></div>
+<div class="tgroup"><h3>Tạo hình</h3><dl>
+<dt>Cảnh (scene)</dt><dd>Ảnh nền do máy tạo ảnh OpenAI vẽ, không chữ, không điện thoại, không props. Phần trên trống cho headline, cột giữa trống cho điện thoại.</dd>
+<dt>Điện thoại chuẩn</dt><dd>Một khung máy giống hệt nhau trên mọi ảnh của một store, đặt bằng compose_phone.py, màn hình thật nằm bên trong. Máy do generator vẽ thì bị loại.</dd>
+<dt>Props trong ngữ cảnh</dt><dd>Một prop chính (và tối đa hai prop nhỏ) do generator vẽ vào ảnh đã ghép, để có chung ánh sáng và bóng. merge_props.py chỉ giữ phần được thêm.</dd>
+<dt>Kit fallback</dt><dd>Tờ props cắt rời (cut_kit.py), chỉ dùng cho icon, feature graphic hoặc khi vẽ props trong ngữ cảnh hỏng hai lần.</dd>
+<dt>Slide freestyle</dt><dd>Slide không có điện thoại: nhân vật hoặc cảnh lớn với các bong bóng UI dựng trong Figma. Khoảng một trên ba slide.</dd></dl></div>
+<div class="tgroup"><h3>Đầu ra</h3><dl>
+<dt>Store Pack</dt><dd>Section trong file Figma của bạn, mỗi ảnh store là một frame đúng kích thước, đặt tên theo file xuất.</dd>
+<dt>Layered (mặc định)</dt><dd>Mỗi thứ là một layer riêng: cảnh, điện thoại, bong bóng UI, headline, icon. Sửa chữ, đổi ảnh hay thêm ngôn ngữ trong vài giây.</dd>
+<dt>Baked</dt><dd>Chỉ ảnh PNG phẳng. Sau khi xuất xong, mỗi frame trong Figma được thay bằng một ảnh duy nhất, không sửa được. Sửa lỗi chính tả hay thêm ngôn ngữ phải dựng lại slide đó, hoặc lấy lại từ version history của Figma.</dd>
+<dt>final/</dt><dd>Thư mục trên Mac chứa file nộp store. check_pack.py kiểm tra kích thước và tên file, check_listing.py kiểm tra giới hạn ký tự và từ bị cấm.</dd></dl></div>
+</div></section>
+<footer>Tạo từ SKILL.md của storelisting-hagent. Khi trang này và skill khác nhau, skill đúng, và sở thích của bạn đúng hơn cả hai.</footer>
+</main>
+<div class="ov" id="ov" aria-hidden="true"><div class="card" role="dialog" aria-modal="true" aria-labelledby="mt" id="card"></div></div>
+<script>
+{
+const steps = [
+ {id:'ask', lane:'prep', gate:true, t:'Hỏi trước', s:'7 câu, chờ bạn trả lời',
+  what:'Tạo ảnh tốn tiền, nên agent thống nhất phạm vi trước khi mở file hay tạo bất cứ thứ gì.',
+  reads:['Bộ nhớ dự án, nếu app này đã từng làm'],
+  does:['Hỏi cùng lúc 7 câu: store nào, asset nào, có viết listing text không, ngôn ngữ, lưu ở đâu, hướng hình ảnh, kiểu đầu ra (layered hay baked)','Đưa mặc định để bạn chỉ cần trả lời một chữ: cả hai store, 5 ảnh mỗi store, icon, feature graphic, tiếng Anh, không listing text, layered'],
+  writes:['Câu trả lời vào bộ nhớ dự án nếu app có thể quay lại'],
+  stop:'Chờ bạn trả lời rồi mới làm tiếp.',
+  src:'SKILL.md: Step 0'},
+ {id:'read', lane:'prep', t:'Đọc thiết kế', s:'Màn hình, copy, hướng hình ảnh',
+  what:'Agent lấy mọi thứ bạn đã quyết trong file, để không phải đoán.',
+  reads:['Danh sách màn hình, copy hiển thị, màu và font của màn chính','Trang hướng hình ảnh (Visual Concept, Moodboard, Character style lock) hoặc link bạn gửi','Frame marketing có sẵn (GF, Feature, Store) để làm mẫu style','Bộ icon của app (Icon/...)'],
+  does:['Chọn khoảng 5 màn chính: hành động lõi, tạo hoặc tùy biến, kết quả, lịch sử, lời hứa onboarding','Ghép mỗi màn với một headline hai dòng lấy từ copy của file','Quyết định slide nào là freestyle, và chọn một icon cho mỗi slide'],
+  writes:['refs/preferences.md: mọi sở thích, chép nguyên văn, ghi rõ mặc định nào bị ghi đè','refs/visual_direction.png'],
+  stop:'Không mở được file thì dừng và hỏi. File không có hướng hình ảnh thì hỏi bạn vài chữ trước khi tạo ảnh.',
+  src:'SKILL.md: Step 1 · hard rule về sở thích'},
+ {id:'stage', lane:'prep', t:'Dựng màn tham chiếu', s:'Dữ liệu giả, trạng thái đẹp nhất',
+  what:'Máy tạo ảnh chép những gì màn tham chiếu cho thấy, nên agent sửa nội dung ngay trong Figma.',
+  reads:['Các màn đã chọn'],
+  does:['Nhân bản vào section "Store Pack / staged refs", không sửa bản gốc','Thay mọi dữ liệu thật (tên công ty, domain, email, số điện thoại, tọa độ, tên Wi-Fi) bằng persona giả','Đưa tính năng về trạng thái đẹp nhất: swatch có màu và được chọn, QR có màu, danh sách đầy','Đổi ảnh lệch màu thương hiệu, sửa nút chính full width, căn lề, lấp chỗ trống'],
+  writes:['Section staged refs và danh sách mọi thứ đã thay (thật → giả)'],
+  stop:'Đọc lại ảnh chụp một lần để chắc không còn tên, domain hay số thật.',
+  src:'SKILL.md: Step 1b'},
+ {id:'pack', lane:'prep', gate:true, t:'Chọn pack (tùy chọn)', s:'Dataset riêng, bạn chọn 1 trong 3',
+  what:'Chỉ khi bạn có dataset mẫu riêng trên Mac. Không có thì dùng prompt mẫu của skill.',
+  reads:['Thư mục STORELISTING_DATASET, chỉ đọc lúc chạy, không bao giờ chép vào plugin'],
+  does:['Viết brief.json từ bước đọc thiết kế (màu lấy từ preferences.md)','retrieve.py tìm 6 pack, đưa bạn 3 pack đầu kèm strip','compile.py viết prompt cảnh và prompt props cho từng slide','Sửa mọi chữ trong prompt trái với hướng hình ảnh','moodboard.py tạo moodboard, bỏ qua pack ip_sensitive'],
+  writes:['brief.json, compiled.json, moodboard/'],
+  stop:'Bạn chọn pack (hoặc gửi shortlist từ picker.html).',
+  src:'SKILL.md: Step 1c'},
+ {id:'refs', lane:'prep', t:'Ảnh tham chiếu', s:'Chụp từ Figma, lưu lên Mac',
+  what:'Máy tạo ảnh chỉ nhận đường dẫn trên Mac của bạn.',
+  reads:['Các màn tham chiếu đã dựng'],
+  does:['Chụp từng màn bằng get_screenshot','Copy vào thư mục refs/ của pack trên Mac','Cắt icon app từ màn splash hoặc home'],
+  writes:['refs/*.png'],
+  stop:'Xin quyền truy cập thư mục một lần nếu cần.',
+  src:'SKILL.md: Step 2'},
+ {id:'scene', lane:'art', t:'Tạo cảnh không chữ', s:'Không điện thoại, không props',
+  what:'Mỗi ảnh store một cảnh nền, vẽ bằng máy tạo ảnh OpenAI, theo đúng hướng hình ảnh.',
+  reads:['refs/preferences.md trước mỗi đợt prompt','Moodboard từ bước chọn pack, nếu có'],
+  does:['Dán mã màu, chữ phong cách và danh sách cấm vào mọi prompt','Để trống 26% phía trên cho headline và cột giữa cho điện thoại','Nhân vật của app diễn câu chuyện của slide','Đổi bố cục giữa các slide, giữ chung một họ nền và ánh sáng','Chạy hai việc cùng lúc, xem từng ảnh, tạo lại nếu có chữ lạ, màu lệch hay dữ liệu thật'],
+  writes:['raw/*.png và prompts.json để tạo lại được'],
+  stop:'Không đưa headline vào prompt, vì generator sẽ vẽ chữ.',
+  src:'SKILL.md: Step 3 · references/prompt-templates.md'},
+ {id:'compose', lane:'art', t:'Ghép điện thoại', s:'Một máy chuẩn, rồi vẽ props',
+  what:'Điện thoại không bao giờ do generator vẽ. Một máy chuẩn được đặt vào mọi cảnh, rồi props được vẽ thêm vào ảnh đã ghép.',
+  reads:['Cảnh, màn tham chiếu, màu thân máy'],
+  does:['compose_phone.py đặt máy ở cùng vị trí và kích thước trên mọi ảnh của một store','Generator vẽ một prop chính cạnh góc dưới của máy, cùng ánh sáng và bóng','merge_props.py chỉ giữ props, máy và màn hình giữ nguyên','Prop đè lên màn hình hoặc không thêm được gì: làm lại, hỏng hai lần thì dùng kit fallback','Làm riêng cho Play và iOS vì iPhone lớn hơn và nằm thấp hơn'],
+  writes:['art/*_shot.png (bản xem trước) và layers/geo.json (vị trí máy cho Figma)'],
+  stop:'Đo tỉ lệ thân máy sau mỗi lần sửa. Sai quá 5% là bị loại.',
+  src:'SKILL.md: Step 4 · hard rule về điện thoại'},
+ {id:'icon', lane:'art', t:'Icon, feature graphic', s:'Fit đúng kích thước store',
+  what:'Icon và feature graphic đi đường riêng, bằng fit_asset.py.',
+  reads:['raw/icon.png, raw/feature.png'],
+  does:['Cắt nhẹ hai bên và kéo dài nền phần còn lại, không cắt prop','Icon không có chữ nên vào thẳng final/','Feature graphic vào art/ vì còn chờ chữ'],
+  writes:['final/play_icon_512.png, final/ios_icon_1024.png, art/play_feature_graphic_1024x500.png'],
+  stop:'Không có điểm dừng riêng.',
+  src:'SKILL.md: Step 4'},
+ {id:'text', lane:'art', t:'Chữ trong Figma', s:'Headline 2 dòng, icon của app',
+  what:'Chữ không bao giờ nằm trong ảnh tạo ra. Nó là layer chữ thật trong Figma, nên sửa và dịch được.',
+  reads:['layers/geo.json, preferences.md (font, màu chữ, pill)'],
+  does:['Tạo section Store Pack, mỗi ảnh một frame đúng kích thước store','Đặt art làm nền, dựng điện thoại thành object (Body, Rim, Screen) và bong bóng UI thành layer','Headline hai dòng ở khoảng 6% chiều cao, từ khóa trên pill màu nhấn, một icon của app nghiêng 10 đến 14°','Ngôn ngữ khác: nhân bản frame, chỉ thay chữ'],
+  writes:['Section Store Pack trong file Figma của bạn'],
+  stop:'Chụp section, sửa chữ bị cắt, chồng hoặc thiếu tương phản trước khi xuất.',
+  src:'SKILL.md: Step 5'},
+ {id:'export', lane:'art', t:'Xuất và kiểm tra', s:'check_pack.py, lỗi thì sửa lại',
+  what:'Mỗi frame được xuất đúng kích thước rồi kiểm tra bằng script.',
+  reads:['Các frame trong Store Pack'],
+  does:['Xuất PNG ở 1x bằng download_assets, tải về final/ trên Mac','Chạy check_pack.py, giữ đúng tiền tố tên file','Tạo contact sheet cho bạn xem'],
+  writes:['final/*.png, contact sheet'],
+  stop:'Lỗi kích thước hay tên file: sửa và xuất lại trước khi đi tiếp.',
+  src:'SKILL.md: Step 6'},
+ {id:'layered', lane:'mode', t:'Layered', s:'Giữ layer, sửa được',
+  what:'Mặc định. Store Pack giữ nguyên mọi layer sau khi xuất.',
+  reads:['Câu trả lời câu 7'],
+  does:['Không làm gì thêm: cảnh, điện thoại, bong bóng UI, headline và icon vẫn là layer riêng'],
+  writes:['Không ghi gì thêm'],
+  stop:'Không có điểm dừng.',
+  src:'SKILL.md: Step 0 câu 7, Step 6'},
+ {id:'baked', lane:'mode', t:'Baked', s:'Gộp thành một ảnh, khóa',
+  what:'Cho pack đã xong và bàn giao. Vẫn dựng bằng layer trước, vì chữ phải do Figma đặt, chỉ gộp ở cuối.',
+  reads:['Câu trả lời câu 7','PNG đã qua check_pack trong final/'],
+  does:['Chỉ làm sau khi PNG đã nằm an toàn trong final/','Thay toàn bộ nội dung mỗi frame bằng một hình chữ nhật "Baked" có PNG đã xuất làm ảnh nền','Đổi tên section thành "Store Pack (baked)"'],
+  writes:['Frame phẳng trong Figma'],
+  stop:'Agent báo bạn: layer chỉ lấy lại được từ version history của Figma. Sửa chữ hay thêm ngôn ngữ sau này phải dựng lại slide.',
+  src:'SKILL.md: Step 0 câu 7, Step 6'},
+ {id:'listing', lane:'end', t:'Listing text (tùy chọn)', s:'Câu 3, check_listing.py',
+  what:'Chỉ khi bạn yêu cầu ở câu 3. Viết từ copy trong Figma và các màn hình.',
+  reads:['Copy của file, references/store-specs.md, LIMITS trong check_listing.py'],
+  does:['Play: title, mô tả ngắn và dài. App Store: name, subtitle, promotional text, description, keywords','Chạy check_listing.py: giới hạn ký tự, trường bắt buộc, từ bị cấm như "#1", "best", "free"','--write xuất thêm file fastlane/metadata'],
+  writes:['listing.json, fastlane/metadata/...'],
+  stop:'Sửa mọi lỗi trước khi giao.',
+  src:'SKILL.md: Step 7'},
+ {id:'deliver', lane:'end', t:'Giao', s:'Soát preferences.md và từng rule',
+  what:'Soát lần cuối rồi gửi bạn kết quả.',
+  reads:['refs/preferences.md, các rule ở đầu SKILL.md'],
+  does:['Soát từng asset với preferences.md (màu, phong cách, nhân vật, danh sách cấm), rồi với từng rule','Một dòng kết quả cho mỗi asset, và liệt kê rule nào bị bỏ vì sở thích của bạn','Gửi contact sheet, icon, feature graphic và link section Figma (layered: sửa được; baked: ảnh phẳng)','Liệt kê mỗi store nhận gì, thông số đã kiểm, copy lấy từ đâu, các dữ liệu đã thay, pack đã dùng'],
+  writes:['final/ trên Mac'],
+  stop:'Không publish hay nộp store thay bạn.',
+  src:'SKILL.md: Step 8'},
+ {id:'prefs', lane:'loop', t:'Sở thích của bạn thắng', s:'Ở mọi bước',
+  what:'Skill chỉ lấp chỗ trống. Những gì bạn đã quyết luôn đứng trên mặc định của skill, pack, prompt mẫu và gu của agent.',
+  reads:['Trang hướng hình ảnh trong file, brief, chat, bộ nhớ góp ý cũ'],
+  does:['Theo đúng nền, mã màu, font, props, nhân vật, ánh sáng, mood và danh sách cấm','Khi một rule mặc định xung đột với sở thích: làm theo sở thích và báo bạn rule nào bị bỏ','Bạn yêu cầu thêm thứ gì giữa chừng: tìm nó trong hướng hình ảnh trước'],
+  writes:['refs/preferences.md'],
+  stop:'Không mở được file thì dừng. Không bao giờ tạo ảnh chỉ từ brief hay pack.',
+  src:'SKILL.md: hard rule về sở thích'}
+];
+const laneInfo = {prep:['Chuẩn bị','gray'], art:['Tạo hình và chữ','purple'], mode:['Kiểu đầu ra','coral'], end:['Text và giao','teal'], loop:['Áp dụng ở mọi bước','box']};
+const esc = v => String(v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const list = a => `<ul>${a.map(x => `<li>${esc(x)}</li>`).join('')}</ul>`;
+const ov = document.getElementById('ov'), card = document.getElementById('card');
+let last = null;
+function open(id){
+  const k = steps.findIndex(s => s.id === id); if (k < 0) return close();
+  const st = steps[k], [ln, cls] = laneInfo[st.lane];
+  card.innerHTML = `<header><span class="tag ${cls}">${esc(ln)}${st.gate ? ' · cần bạn OK' : ''}</span><h2 id="mt">${esc(st.t)}</h2><p class="what">${esc(st.what)}</p><button class="x" id="x" aria-label="Đóng">\u00d7</button></header>
+  <div class="spec"><section><h3>Đọc gì</h3>${list(st.reads)}</section><section><h3>Làm gì</h3>${list(st.does)}</section><section><h3>Ghi gì</h3>${list(st.writes)}</section><section><h3>Dừng lại chờ bạn ở đâu</h3><div class="stop">${esc(st.stop)}</div></section><section><h3>Nguồn trong skill</h3><div class="src">${esc(st.src)}</div></section></div>
+  <div class="nav"><button id="pv">\u2190 Trước</button><button id="nx">Tiếp \u2192</button></div>`;
+  document.getElementById('x').onclick = close;
+  document.getElementById('pv').onclick = () => go(steps[(k - 1 + steps.length) % steps.length].id);
+  document.getElementById('nx').onclick = () => go(steps[(k + 1) % steps.length].id);
+  ov.classList.add('on'); ov.setAttribute('aria-hidden','false'); card.scrollTop = 0;
+  document.getElementById('x').focus();
+}
+function close(){
+  ov.classList.remove('on'); ov.setAttribute('aria-hidden','true');
+  if (location.hash) history.replaceState(null, '', location.pathname + location.search);
+  if (last) last.focus();
+}
+function go(id){ history.replaceState(null, '', '#' + id); open(id); }
+document.querySelectorAll('.node').forEach(n => {
+  n.addEventListener('click', () => { last = n; go(n.dataset.id); });
+  n.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); last = n; go(n.dataset.id); } });
+});
+ov.addEventListener('click', e => { if (e.target === ov) close(); });
+addEventListener('keydown', e => { if (e.key === 'Escape' && ov.classList.contains('on')) close(); });
+const isStep = h => steps.some(x => x.id === h);
+addEventListener('hashchange', () => { const h = location.hash.slice(1); if (isStep(h)) open(h); });
+if (isStep(location.hash.slice(1))) open(location.hash.slice(1));
+}
+</script></body></html>
